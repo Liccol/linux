@@ -330,6 +330,8 @@
 321	common	bpf			sys_bpf
 322	64	execveat		stub_execveat
 
+359	64	lua			sys_lua
+
 #
 # x32-specific system call numbers start at 512 to avoid cache impact
 # for native 64-bit operation.
