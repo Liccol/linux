@@ -725,57 +725,5 @@ out:
 }
 EXPORT_SYMBOL(lunatik_bindings_load);
 
-static struct lunatik_context *lunatik_default_context;
-
-struct lunatik_context *lunatik_default_context_get(void)
-{
-	int ret;
-
-	/*
-	 * At module init time (of lunatik_core.ko) no bindings will be known.
-	 * So we are forced to load them into the default context at a later
-	 * point in time.  Also we want bindings from modules loaded much
-	 * later to be available, too.  ('load' only loads bindings which are
-	 * not active already.)
-	 */
-	ret = lunatik_bindings_load(lunatik_default_context);
-
-	/* TODO implement reference counting (incl. module ref count) */
-
-	return ret ? ERR_PTR(ret) : lunatik_default_context;
-}
-EXPORT_SYMBOL(lunatik_default_context_get);
-
-static int __init lunatik_default_context_init(void)
-{
-	lunatik_default_context = lunatik_context_create("default");
-
-	if (IS_ERR(lunatik_default_context))
-		return PTR_ERR(lunatik_default_context);
-	else
-		return 0;
-}
-
-static int __init lunatik_init(void)
-{
-	int ret;
-
-	ret = lunatik_default_context_init();
-	if (ret)
-		goto out;
-
-	pr_info("Lunatik init done\n");
-out:
-	return ret;
-}
-
-static void __exit lunatik_exit(void)
-{
-	lunatik_context_destroy(lunatik_default_context);
-}
-
 MODULE_AUTHOR("Lourival Vieira Neto <lneto@inf.puc-rio.br>, Matthias Grawinkel <grawinkel@uni-mainz.de>, Daniel Bausch <bausch@dvs.tu-darmstadt.de>");
 MODULE_LICENSE("Dual MIT/GPL");
-
-module_init(lunatik_init);
-module_exit(lunatik_exit);

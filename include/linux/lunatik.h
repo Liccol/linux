@@ -65,7 +65,6 @@ extern struct lunatik_context *lunatik_context_create(char *name);
 extern void lunatik_context_destroy(struct lunatik_context *lc);
 #define lunatik_context_lock(context_ptr) mutex_lock(&(context_ptr)->mutex);
 #define lunatik_context_unlock(context_ptr) mutex_unlock(&(context_ptr)->mutex);
-struct lunatik_context *lunatik_default_context_get(void);
 
 /* DEPRECATED - use direct, sync, or async variant instead */
 extern int lunatik_loadcode(struct lunatik_context *lc, char *code,
