@@ -6,6 +6,7 @@
  * See Copyright Notice at the end of this file.
  */
 
+#include <linux/mutex.h>
 #include <linux/lunatik/lauxlib.h>
 
 struct lunatik_result {
@@ -37,16 +38,59 @@ struct lunatik_result {
 	};
 };
 
-lua_State *lunatik_get_global_state(void);
-void lunatik_lock_global_state(void);
-void lunatik_unlock_global_state(void);
+struct lunatik_workqueue {
+	struct workqueue_struct *wq;
+};
 
-int lunatik_loadcode(char *code, size_t sz_code,
-		struct lunatik_result **presult);
-int lunatik_loadcode_direct(char *code, size_t sz_code,
-			struct lunatik_result **presult);
-void lunatik_result_free(const struct lunatik_result *result);
-int lunatik_openlib(lua_CFunction luaopen_func);
+struct lunatik_context {
+	lua_State *L;
+	struct mutex mutex;
+	struct lunatik_workqueue lwq;
+	struct list_head active_bindings;
+};
+
+typedef int (*lunatik_binding_func)(struct lunatik_context *lc);
+
+struct lunatik_binding {
+	struct module *owner;
+	lunatik_binding_func regfunc;
+	struct list_head link;
+};
+
+typedef void (*lunatik_loadcode_callback)(void *arg, int ret,
+					struct lunatik_result *r);
+typedef void (*lunatik_loadcode_callback_nores)(void *arg, int ret);
+
+extern struct lunatik_context *lunatik_context_create(char *name);
+extern void lunatik_context_destroy(struct lunatik_context *lc);
+#define lunatik_context_lock(context_ptr) mutex_lock(&(context_ptr)->mutex);
+#define lunatik_context_unlock(context_ptr) mutex_unlock(&(context_ptr)->mutex);
+struct lunatik_context *lunatik_default_context_get(void);
+
+/* DEPRECATED - use direct, sync, or async variant instead */
+extern int lunatik_loadcode(struct lunatik_context *lc, char *code,
+			size_t sz_code, struct lunatik_result **presult);
+extern int lunatik_loadcode_direct(struct lunatik_context *lc, char *code,
+				size_t sz_code,
+				struct lunatik_result **presult);
+extern int lunatik_loadcode_sync(struct lunatik_context *lc, char *code,
+				size_t sz_code,
+				struct lunatik_result **presult);
+extern int lunatik_loadcode_async(struct lunatik_context *lc, char *code,
+				size_t sz_code,
+				lunatik_loadcode_callback callb,
+				void *callb_arg);
+extern int lunatik_loadcode_async_nores(struct lunatik_context *lc, char *code,
+					size_t sz_code,
+					lunatik_loadcode_callback_nores callb,
+					void *callb_arg);
+extern void lunatik_result_free(const struct lunatik_result *result);
+extern int lunatik_openlib(struct lunatik_context *lc,
+			lua_CFunction luaopen_func);
+extern struct lunatik_binding *lunatik_bindings_register(
+	struct module *owner, lunatik_binding_func regfunc);
+extern void lunatik_bindings_unregister(struct lunatik_binding *b);
+extern int lunatik_bindings_load(struct lunatik_context *lc);
 
 /******************************************************************************
  *  Copyright (C) 2009 Lourival Vieira Neto.  All rights reserved.
