@@ -1,10 +1,12 @@
 lua_objects := lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o \
 	lmem.o lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o \
-	ltm.o lundump.o lvm.o lzio.o lauxlib.o
+	ltm.o lundump.o lvm.o lzio.o lauxlib.o lbaselib.o ltablib.o lstrlib.o \
+	lmathlib.o linit.o
 
 lua_headers := lapi.h lauxlib.h lcode.h ldebug.h ldo.h lfunc.h lgc.h \
 	llex.h llimits.h lmem.h lobject.h lopcodes.h lparser.h lstate.h \
-	lstring.h ltable.h ltm.h lua.h luaconf.h lundump.h lvm.h lzio.h
+	lstring.h ltable.h ltm.h lua.h luaconf.h lundump.h lvm.h lzio.h \
+	lualib.h
 
 $(foreach lua_object, $(lua_objects), \
 	$(eval CFLAGS_$(lua_object) = -I$(src)/fakelibc_include))

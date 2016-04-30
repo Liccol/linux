@@ -20,6 +20,7 @@
 #include <linux/lunatik.h>
 
 #include "lauxlib.h"
+#include "lualib.h"
 
 struct lunatik_work {
 	struct lunatik_context *lc;
@@ -293,6 +294,7 @@ struct lunatik_context *lunatik_context_create(char *name)
 		e = -ENOMEM;
 		goto out_free;
 	}
+	luaL_openlibs(lc->L);
 
 	mutex_init(&lc->mutex);
 
