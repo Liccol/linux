@@ -8,4 +8,6 @@ LF(gc_count);
 LF(type);
 #undef LF
 
+extern int lunatik_inspect_register(struct lunatik_context *lc);
+
 #endif /* __LUNATIK_BINDINGS_INSPECT */

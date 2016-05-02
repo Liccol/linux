@@ -8,7 +8,7 @@
 #include <crypto/hash.h>
 
 #include <linux/lunatik.h>
-#include "buffer.h"
+#include <linux/lunatik/bindings/buffer.h>
 
 int lunatik_sha1(lua_State *L) {
 	struct hash_desc desc;
@@ -65,7 +65,7 @@ int lunatik_get_random_bytes(lua_State *L) {
 }
 EXPORT_SYMBOL(lunatik_get_random_bytes);
 
-static int lunatik_crypto_register(struct lunatik_context *lc)
+int lunatik_crypto_register(struct lunatik_context *lc)
 {
 	struct luaL_Reg lib_crypto[] = {
 		{ "sha1", &lunatik_sha1 },
@@ -79,6 +79,7 @@ static int lunatik_crypto_register(struct lunatik_context *lc)
 
 	return 0;
 }
+EXPORT_SYMBOL(lunatik_crypto_register);
 
 static struct lunatik_binding *lunatik_crypto_binding;
 

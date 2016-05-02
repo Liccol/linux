@@ -9,4 +9,6 @@ LF(buf_call);
 LF(buf_new);
 #undef LF
 
+extern int lunatik_buf_register(struct lunatik_context *lc);
+
 #endif /* __LUNATIK_BINDINGS_BUFFER */

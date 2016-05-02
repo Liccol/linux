@@ -16,7 +16,7 @@ int lunatik_type(lua_State *L) {
 }
 EXPORT_SYMBOL(lunatik_type);
 
-static int lunatik_inspect_register(struct lunatik_context *lc)
+int lunatik_inspect_register(struct lunatik_context *lc)
 {
 	lunatik_context_lock(lc);
 	lua_register(lc->L, "type", &lunatik_type);
@@ -25,6 +25,7 @@ static int lunatik_inspect_register(struct lunatik_context *lc)
 
 	return 0;
 }
+EXPORT_SYMBOL(lunatik_inspect_register);
 
 static struct lunatik_binding *lunatik_inspect_binding;
 

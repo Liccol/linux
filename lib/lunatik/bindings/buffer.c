@@ -84,7 +84,7 @@ int lunatik_buf_new(lua_State *L) {
 }
 EXPORT_SYMBOL(lunatik_buf_new);
 
-static int lunatik_buf_register(struct lunatik_context *lc)
+int lunatik_buf_register(struct lunatik_context *lc)
 {
 	struct luaL_reg lib_buffer[] = {
 		{ "new", &lunatik_buf_new },
@@ -97,6 +97,7 @@ static int lunatik_buf_register(struct lunatik_context *lc)
 
 	return 0;
 }
+EXPORT_SYMBOL(lunatik_buf_register);
 
 static struct lunatik_binding *lunatik_buf_binding;
 

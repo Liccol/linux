@@ -23,7 +23,7 @@ int lunatik_printk(lua_State *L) {
 }
 EXPORT_SYMBOL(lunatik_printk);
 
-static int lunatik_printk_register(struct lunatik_context *lc)
+int lunatik_printk_register(struct lunatik_context *lc)
 {
 	lunatik_context_lock(lc);
 	lua_register(lc->L, "print", &lunatik_printk);
@@ -31,6 +31,7 @@ static int lunatik_printk_register(struct lunatik_context *lc)
 
 	return 0;
 }
+EXPORT_SYMBOL(lunatik_printk_register);
 
 static struct lunatik_binding *lunatik_printk_binding;
 
