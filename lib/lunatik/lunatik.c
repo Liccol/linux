@@ -140,8 +140,28 @@ static void loadcode_internal(struct lunatik_context *lc,
 			struct loadcode_data *d)
 {
 	lua_State *L;
+#ifdef DEBUG
+	char *c = d->code;
+	char *nextline = strchr(c, '\n');
 
-	pr_debug("[lunatik] executing lua code: (0x%p) %s\n", d->code, d->code);
+	if (!nextline) {
+		pr_debug("[lunatik] executing lua code: (0x%p) %s\n", d->code,
+			d->code);
+	} else {
+		int lineno = 1;
+		pr_debug("[lunatik] executing lua code: (0x%p)\n", d->code);
+		do {
+			pr_debug("(%4d) %.*s\n", lineno, (int) (nextline - c),
+				c);
+			lineno++;
+			c = nextline + 1;
+			nextline = strchr(c, '\n');
+		} while (nextline);
+		if (strlen(c)) {
+			pr_debug("(%4d) %s\n", lineno, c);
+		}
+	}
+#endif
 
 	lunatik_context_lock(lc);
 	L = lc->L;
