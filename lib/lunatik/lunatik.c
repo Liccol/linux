@@ -7,6 +7,8 @@
 #define DEBUG 1
 #endif
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/string.h>
@@ -110,7 +112,7 @@ static struct lunatik_result *lunatik_result_get(lua_State *L, int idx,
 		} else {
 			r_userdata_type = "";
 		}
-		pr_debug("[lunatik] userdata_type = %s\n", r_userdata_type);
+		pr_debug("%s: userdata_type = %s\n", __func__, r_userdata_type);
 		r->r_userdata_type =
 			kmalloc(r_userdata_type_size + 1, GFP_KERNEL);
 		if (!r->r_userdata_type) {
@@ -145,11 +147,11 @@ static void loadcode_internal(struct lunatik_context *lc,
 	char *nextline = strchr(c, '\n');
 
 	if (!nextline) {
-		pr_debug("[lunatik] executing lua code: (0x%p) %s\n", d->code,
-			d->code);
+		pr_debug("%s: executing lua code: (0x%p) %s\n",
+			__func__, d->code, d->code);
 	} else {
 		int lineno = 1;
-		pr_debug("[lunatik] executing lua code: (0x%p)\n", d->code);
+		pr_debug("%s: executing lua code: (0x%p)\n", __func__, d->code);
 		do {
 			pr_debug("(%4d) %.*s\n", lineno, (int) (nextline - c),
 				c);
@@ -168,15 +170,15 @@ static void loadcode_internal(struct lunatik_context *lc,
 
 	d->ret = luaL_loadbuffer(L, d->code, d->sz_code - 1, "loadcode");
 	if (d->ret)
-		pr_err("[lunatik] luaL_loadbuffer failed\n");
+		pr_err("error while loading Lua code\n");
 	else {
 		d->ret = lua_pcall(L, 0, 1, 0);
 		if (d->ret)
-			pr_err("[lunatik] lua_pcall failed\n");
+			pr_err("error while executing Lua code\n");
 	}
 
 	if (d->ret && lua_type(L, -1) == LUA_TSTRING)
-		pr_err("[lunatik] %s\n", lua_tostring(L, -1));
+		pr_err("Lua error: %s\n", lua_tostring(L, -1));
 
 	if (d->need_result) {
 		d->result = lunatik_result_get(L, -1, &d->ret);
@@ -184,7 +186,7 @@ static void loadcode_internal(struct lunatik_context *lc,
 #ifdef DEBUG
 		struct lunatik_result *r;
 
-		pr_debug("[lunatik] async lua execution done\n");
+		pr_debug("%s: async lua execution done\n", __func__);
 
 		r = lunatik_result_get(L, -1, NULL);
 
@@ -209,8 +211,8 @@ static void loadcode_internal(struct lunatik_context *lc,
 			default:
 				r_type_name = "UNKNOWN";
 			}
-			pr_debug("[lunatik] result of type %s thrown away\n",
-				r_type_name);
+			pr_debug("%s: result of type %s thrown away\n",
+				__func__, r_type_name);
 		}
 
 		lunatik_result_free(r);
@@ -416,8 +418,8 @@ int lunatik_loadcode(struct lunatik_context *lc, char *code, size_t sz_code,
 		goto out_free;
 	}
 
-	pr_debug("[lunatik_loadcode] going to execute lua code: (0x%p) %s\n",
-		d->code, d->code);
+	pr_debug("%s: going to execute lua code: (0x%p) %s\n",
+		__func__, d->code, d->code);
 
 	lunatik_work_queue(lw);
 
@@ -484,8 +486,8 @@ int lunatik_loadcode_sync(struct lunatik_context *lc, char *code,
 		goto out_free;
 	}
 
-	pr_debug("[lunatik_loadcode_sync] going to execute lua code: (0x%p) %s\n",
-		d->code, d->code);
+	pr_debug("%s: going to execute lua code: (0x%p) %s\n",
+		__func__, d->code, d->code);
 
 	lunatik_work_queue(lw);
 
@@ -558,8 +560,8 @@ int lunatik_loadcode_async(struct lunatik_context *lc, char *code,
 		goto out_free;
 	}
 
-	pr_debug("[lunatik_loadcode_async] going to execute lua code: (0x%p) %s\n",
-		d->code, d->code);
+	pr_debug("%s: going to execute lua code: (0x%p) %s\n",
+		__func__, d->code, d->code);
 
 	lunatik_work_queue(lw);
 
@@ -618,8 +620,8 @@ int lunatik_loadcode_async_nores(struct lunatik_context *lc, char *code,
 		goto out_free;
 	}
 
-	pr_debug("[lunatik_loadcode_async_nores] going to execute lua code: (0x%p) %s\n",
-		d->code, d->code);
+	pr_debug("%s: going to execute lua code: (0x%p) %s\n",
+		__func__, d->code, d->code);
 
 	lunatik_work_queue(lw);
 
@@ -639,7 +641,7 @@ EXPORT_SYMBOL(lunatik_loadcode_async_nores);
 void lunatik_result_free(const struct lunatik_result *result)
 {
 	if (result) {
-		pr_debug("[lunatik] free result\n");
+		pr_debug("%s: free result\n", __func__);
 		switch (result->r_type) {
 		case LUA_TSTRING:
 			kfree(result->r_string);
